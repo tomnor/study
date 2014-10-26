@@ -1,3 +1,4 @@
 *.pyc
 *.html
 *.tmp
+docs/_build

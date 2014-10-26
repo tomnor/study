@@ -4,37 +4,39 @@
 Count lines of code. The file(s) are assumed to have a structure that can be
 expressed like this:
 
-lines = code-lines + comment-lines + white-lines
+`lines = code-lines + comment-lines + white-lines`
 
-Shebangs evaluate to comment.
+Shebangs evaluate to comment. Another weakness::
 
-# Unfortunatly those two lines will evaluate to comments. Can somebody
-# fix that nicely? Those two lines are part of this docstring.
+    # Unfortunatly those two lines will evaluate to comments. Can somebody
+    # fix that nicely? Those two lines are part of this docstring.
 
 Docstrings in python are also code. This utility gives a suggestion of
-how many of the total lines are docstrings.
+how many of the total lines are docstrings. Pseudo output for (1) file::
 
-line stat for <filename>
-============================================
-TOT: <N>
-CODE: <N>
-COMMENT: <N>
-WHITE: <N>
-CODE RATE: <N> %
+    line stat for <filename>
+    ============================================
+    TOT: <N>
+    CODE: <N>
+    COMMENT: <N>
+    WHITE: <N>
+    CODE RATE: <N> %
 
-DOCSTRING BLOBS: <N> DOCSTRING LINES: <N>
----------------------------------------------
+    DOCSTRING BLOBS: <N> DOCSTRING LINES: <N>
+    ---------------------------------------------
 
 The docstring lines are part of the total lines, not only part of code.
 
-Usage: sloc "<pat>"
+Output of ``--help``::
 
-Given that this file runs on the command sloc. Replace pat with a file
-name path pattern. The quotes might be required to protect your pattern
-from being expanded by the shell.
+    Usage: sloc "<pat>"
 
-Or maybe:
-python sloc.py "<pat>"
+    Given that this file runs on the command sloc. Replace pat with a file
+    name path pattern. The quotes might be required to protect your pattern
+    from being expanded by the shell.
+
+    Or maybe:
+    python sloc.py "<pat>"
 """
 
 import re

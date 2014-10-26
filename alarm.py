@@ -8,6 +8,8 @@ minutes.
 
 Need `beep <https://github.com/johnath/beep/>`_ on a GNU/Linux system.
 
+Here is the ``--help`` output::
+
     usage: alarm [-h] [-b "<options>"] [-a] number
 
     Beep-alarm in some minutes
@@ -43,15 +45,17 @@ parser.add_argument(dest='minutes', metavar='number', type=float,
 parser.add_argument('-a', '--asynch', dest='asynch', action='store_true',
                     help='If given - start beep in the background')
 
-args = parser.parse_args()
+if __name__ == '__main__':
 
-print 'minutes =', args.minutes
-print 'beep_opts =', args.beep_opts
-print 'asynch =', args.asynch
+    args = parser.parse_args()
 
-ms = str(args.minutes * 60000)
-bg = ''
-if args.asynch:
-    bg = ' &'
+    print 'minutes =', args.minutes
+    print 'beep_opts =', args.beep_opts
+    print 'asynch =', args.asynch
 
-os.system('beep -l 0 -D ' + ms + ' --new ' + args.beep_opts + bg)
+    ms = str(args.minutes * 60000)
+    bg = ''
+    if args.asynch:
+        bg = ' &'
+
+    os.system('beep -l 0 -D ' + ms + ' --new ' + args.beep_opts + bg)
