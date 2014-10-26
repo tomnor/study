@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Command line utility sloc &mdash; study 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="study 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="Command line utility alarm" href="alarm.html" />
+    <link rel="prev" title="Welcome to study’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="alarm.html" title="Command line utility alarm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to study’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">study 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="command-line-utility-sloc">
+<h1>Command line utility sloc<a class="headerlink" href="#command-line-utility-sloc" title="Permalink to this headline">¶</a></h1>
+<p>An attempt to do some code stat on python files.</p>
+<div class="section" id="module-sloc">
+<span id="module-content"></span><h2>Module content<a class="headerlink" href="#module-sloc" title="Permalink to this headline">¶</a></h2>
+<p>Count lines of code. The file(s) are assumed to have a structure that can be
+expressed like this:</p>
+<p><cite>lines = code-lines + comment-lines + white-lines</cite></p>
+<p>Shebangs evaluate to comment. Another weakness:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Unfortunatly those two lines will evaluate to comments. Can somebody</span>
+<span class="c"># fix that nicely? Those two lines are part of this docstring.</span>
+</pre></div>
+</div>
+<p>Docstrings in python are also code. This utility gives a suggestion of
+how many of the total lines are docstrings. Pseudo output for (1) file:</p>
+<div class="highlight-python"><div class="highlight"><pre>line stat for &lt;filename&gt;
+============================================
+TOT: &lt;N&gt;
+CODE: &lt;N&gt;
+COMMENT: &lt;N&gt;
+WHITE: &lt;N&gt;
+CODE RATE: &lt;N&gt; %
+
+DOCSTRING BLOBS: &lt;N&gt; DOCSTRING LINES: &lt;N&gt;
+---------------------------------------------
+</pre></div>
+</div>
+<p>The docstring lines are part of the total lines, not only part of code.</p>
+<p>Output of <tt class="docutils literal"><span class="pre">--help</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>Usage: sloc &quot;&lt;pat&gt;&quot;
+
+Given that this file runs on the command sloc. Replace pat with a file
+name path pattern. The quotes might be required to protect your pattern
+from being expanded by the shell.
+
+Or maybe:
+python sloc.py &quot;&lt;pat&gt;&quot;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Command line utility sloc</a><ul>
+<li><a class="reference internal" href="#module-sloc">Module content</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to study&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="alarm.html"
+                        title="next chapter">Command line utility alarm</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sloc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="alarm.html" title="Command line utility alarm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to study’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">study 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Tomas Nordin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
