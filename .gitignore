@@ -1,5 +1,5 @@
 *.pyc
-#*.html
+*.html
 *.tmp
 buf*
 docs/_build
