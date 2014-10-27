@@ -7,12 +7,12 @@ Welcome to study's documentation!
 =================================
 
 This repo for study things. Mostly python I guess. Also a good place to
-experiment with git and doc things.
+experiment with git and doc things. With this repo is meant https://github.com/tomnor/study.
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 
 
    sloc.rst
    alarm.rst
