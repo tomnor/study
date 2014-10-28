@@ -8,6 +8,10 @@ minutes.
 
 Need `beep <https://github.com/johnath/beep/>`_ on a GNU/Linux system.
 
+But this need to be rewritten. Beep has limit on the delay? Also beep
+might or might not work on a given system. For more study, explore the
+at program, maybe in combination with cvlc. 
+
 Here is the ``--help`` output::
 
     usage: alarm [-h] [-b "<options>"] [-a] number
