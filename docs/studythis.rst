@@ -38,7 +38,7 @@ Memo recorder
 =============
 
 I have just discovered a seemingly fantastic cross platform audio manipulation
-program, command line based. 
+program, command line based.
 sox - Sound eXchange, the Swiss Army knife of audio manipulation.
 
 I might use this program to make an update of the :doc:`alarm`.

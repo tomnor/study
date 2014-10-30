@@ -8,7 +8,7 @@ A session of play, the letter on my mind was 'T'::
     Think of a letter and remember it, then press enter
     ['M', 'A', 'N', 'R', 'L', 'P', 'B', 'F', 'D', 'H', 'E', 'C', 'G', 'O', 'Q',
     'U', 'T', 'I', 'K', 'J', 'S']
-    --> 
+    -->
     1 ['M', 'R', 'B', 'H', 'G', 'U', 'K']
     2 ['A', 'L', 'F', 'E', 'O', 'T', 'J']
     3 ['N', 'P', 'D', 'C', 'Q', 'I', 'S']
