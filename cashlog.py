@@ -25,11 +25,6 @@ import glob
 import collections
 from operator import attrgetter
 
-rx_date = r'\s*"?(\d{4}-\d{2}-\d{2})"?,'
-rx_info = r'(.+?)'
-rx_amounts = (r'"?([+-]?(?:\d+[,.])+\d{1,2})"?,?' + # amount
-               r'(?:,"?([+-]?(?:\d+[,.])+\d{1,2})"?)?')  # balance
-
 rx_date = r'\s*"?(?P<date>\d{4}-\d{2}-\d{2})"?,'
 rx_info = r'(?P<info>.+?)'
 rx_amounts = (r'"?(?P<amount>[+-]?(?:\d+[,.])+\d{1,2})"?,?' + # amount
@@ -57,10 +52,10 @@ def grep(res, *expressions, **kw):
     """Return matches in res where a re.search return a match in the
     attribute info, run on expressions. Each expression in expressions
     must have a match in the transaction.
-    
+
     kw can hold flags and wprint and invert. invert is a sequence with 0:s and
     1:s with the same number of elements as the number of expressions. Or None
-    (default). 
+    (default).
     """
     off = set(kw) - set(['flags', 'wprint', 'invert'])
     if off:
@@ -77,7 +72,7 @@ def grep(res, *expressions, **kw):
             if inv:
                 hits.append(not re.search(expression, trans.info, flags=flags))
             else:
-                hits.append(re.search(expression, trans.info, flags=flags))                
+                hits.append(re.search(expression, trans.info, flags=flags))
         if hits and all(hits):
             lns.append(trans)
             if wprint:
@@ -90,13 +85,13 @@ def sanetrans(fo):
     attributes date and amount will be None.
 
     """
-    
+
     rx_numstart = r'\s*"?\d+'
-    
+
     rx = rx_date + rx_info + rx_amounts
     lns = fo.read()
     lns = lns.splitlines()
-    
+
     # cleanups:
     lns = [ln for ln in lns if ln.strip()]
     lns = [ln for ln in lns if re.match(rx_numstart, ln)]
@@ -148,7 +143,7 @@ def stat(res):
     amounts = [t.amount for t in res]
     print 'Period:', res[0].date, res[-1].date
     print 'Number of transactions:', len(res)
-    pos, neg = (sum([a for a in amounts if a > 0]), 
+    pos, neg = (sum([a for a in amounts if a > 0]),
                 sum([a for a in amounts if a < 0]))
     print 'sum:', pos + neg
     print 'pos:', pos
@@ -186,14 +181,14 @@ def daterange(res, start, stop):
 def calenderfmt(res):
     """Produce a string that serves as a calender informing on number of
     transactions for the years in res. calenderdict function is used."""
-    
+
     calstr = ''
     fmtstr = '{:<4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}{:>4}'
     calstr += fmtstr.format(*calendar.month_abbr) + '\n'
     caldict = calenderdict(res)
     for year in sorted(caldict):
         calstr += fmtstr.format(year, *caldict[year]) + '\n'
-    
+
     return calstr.strip()       # last newline off
 
 def calenderdict(res):
@@ -231,4 +226,4 @@ def statgen(pat):
     fileresults.sort(key=sortkey)
     for res in fileresults:
         yield stat(res)
-    
+
