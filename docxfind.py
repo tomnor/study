@@ -15,6 +15,7 @@ matching substring.
 import re
 import zipfile
 from collections import namedtuple
+import argparse
 
 Submatch = namedtuple('Submatch', ('str', 'cnt', 'fn'))
 opening = r'(?:<w:t>'
@@ -57,3 +58,14 @@ def scanzip(zipdoc, pat, wrap=False):
     # retres = [
 
     return resd, retres
+
+parser = argparse.ArgumentParser(description=('Match some words in a ms word '
+                                              'document of the docx format'))
+
+mess = """Try to limit the matches to the document substance by wrapping the
+pattern inside some tag pattern.
+"""
+parser.add_argument('-w', '--wrap',
+                    help=mess)
+
+args = parser.parse_args()
