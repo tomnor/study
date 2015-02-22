@@ -12,3 +12,17 @@ document in the graphical application.
 This tool then would display what is matched, but not attempt to give
 any information on line numbers or context.
 """
+import re
+import zipfile
+
+def grep(f, pat):
+    """Return a list with matching lines."""
+
+    rx = re.compile(pat)
+    res = []
+    for ln in f.readlines():
+        m = rx.search(ln)
+        if m:
+            res.append(ln[m.start(): m.end()])
+
+    return res
