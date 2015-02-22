@@ -65,7 +65,9 @@ parser = argparse.ArgumentParser(description=('Match some words in a ms word '
 mess = """Try to limit the matches to the document substance by wrapping the
 pattern inside some tag pattern.
 """
-parser.add_argument('-w', '--wrap',
+parser.add_argument('-w', '--wrap', action='store_true', dest='wrap', 
                     help=mess)
 
 args = parser.parse_args()
+
+print 'value of wrap:', args.wrap
