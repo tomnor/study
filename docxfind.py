@@ -16,27 +16,44 @@ import re
 import zipfile
 from collections import namedtuple
 
-Submatch = namedtuple('Submatch', ('str', 'cnt'))
+Submatch = namedtuple('Submatch', ('str', 'cnt', 'fn'))
+opening = r'(?:<w:t>'
+closing = r'</w:t>)'
+
+reflags = re.UNICODE
 
 def grep(f, pat):
     """Return a list with strings matching pat in f.
 
     f is a file opened for reading."""
 
-    rx = re.compile(pat)
+    rx = re.compile(pat, flags=reflags)
     res = rx.findall(f.read())
-
-    # for ln in f.readlines():
-    #     m = rx.search(ln)
-    #     if m:
-    #         res.append(ln[m.start(): m.end()])
 
     return res
 
-def scanzip(zipdoc, pat):
+def scanzip(zipdoc, pat, wrap=False):
     """Scan through the files in zipdoc for pat. Return the results as a
     list of Submatches.
 
     The zipdoc is probably not opened for reading."""
 
-    
+    # z = zipfile.ZipFile(zipdoc)
+    with zipfile.ZipFile(zipdoc) as z:
+        resd = dict()
+        for info in z.infolist():
+            if not wrap:
+                resd[info.filename] = grep(z.open(info), pat)
+            else:
+                resd[info.filename] = grep(z.open(info), opening + pat + closing)
+
+    poppers = [k for k in resd if not resd[k]]
+    [resd.pop(k) for k in poppers]
+
+    retres = []
+    for k in resd:
+        uniqs = set(resd[k])
+        retres += [Submatch(s, resd[k].count(s), k) for s in uniqs]
+    # retres = [
+
+    return resd, retres
