@@ -9,8 +9,8 @@ graphical application.
 This tool then would display what is matched, but not attempt to give
 any information on line numbers or context.
 
-It will provide some meta data on the number of occurences of respective
-matching substring.
+It will provide some meta data on the number of occurrences of respective
+matching sub-string.
 """
 import re
 import zipfile
@@ -62,12 +62,26 @@ def scanzip(zipdoc, pat, wrap=False):
 parser = argparse.ArgumentParser(description=('Match some words in a ms word '
                                               'document of the docx format'))
 
-mess = """Try to limit the matches to the document substance by wrapping the
-pattern inside some tag pattern.
+mess = """Try to limit the matches to document substance by wrapping the pattern
+inside some tag pattern.
 """
-parser.add_argument('-w', '--wrap', action='store_true', dest='wrap', 
+parser.add_argument('-w', '--wrap', action='store_true', dest='wrap',
                     help=mess)
+
+mess = """Regular expression python style. Keep in mind that the files searched
+is a bunch of XML files that hold plenty of meta data that you might not want to
+match. Make part of pattern of interest a group by using parenthesis;
+'pa(tter)n'."""
+parser.add_argument('pat', nargs=1, help=mess)
+mess = """A ms word file docx style."""
+parser.add_argument('file', nargs=1, help=mess)
 
 args = parser.parse_args()
 
-print 'value of wrap:', args.wrap
+def doit():
+    _, res = scanzip(args.file[-1], args.pat[-1], args.wrap)
+    for sub in res:
+        print sub
+
+if __name__ == '__main__':
+    doit()
