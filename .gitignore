@@ -4,3 +4,5 @@
 buf*
 docs/_build
 notes.txt
+*.docx
+*.doc
