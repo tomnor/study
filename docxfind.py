@@ -76,7 +76,7 @@ parser.add_argument('pat', nargs=1, help=mess)
 mess = """A ms word file docx style."""
 parser.add_argument('file', nargs=1, help=mess)
 
-args = parser.parse_args()
+
 
 def doit():
     _, res = scanzip(args.file[-1], args.pat[-1], args.wrap)
@@ -84,4 +84,5 @@ def doit():
         print sub
 
 if __name__ == '__main__':
+    args = parser.parse_args()
     doit()
