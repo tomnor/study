@@ -11,6 +11,13 @@ any information on line numbers or context.
 
 It will provide some meta data on the number of occurrences of respective
 matching sub-string.
+
+Update Sun Mar  1 15:48:53 2015
+
+I should just make this a tool for searching ms word documents. Let it
+be .doc or . docx. So it will be inferred from the extension. Also, with
+docx I will limit the search to relevant xml files. Need to read in on
+that, there is some specs to read maybe.
 """
 import re
 import zipfile
@@ -75,8 +82,6 @@ match. Make part of pattern of interest a group by using parenthesis;
 parser.add_argument('pat', nargs=1, help=mess)
 mess = """A ms word file docx style."""
 parser.add_argument('file', nargs=1, help=mess)
-
-
 
 def doit():
     _, res = scanzip(args.file[-1], args.pat[-1], args.wrap)
