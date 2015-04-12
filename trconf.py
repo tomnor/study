@@ -13,7 +13,7 @@ rxpatterns = {
 'date': r'(\d{4}-\d{2}-\d{2})',
 'info': r'two'\
         r'three',
-'amount': (r'"?[+-]?((?:\d+[,.])+\d{1,2})"?'),
+'amount': (r'"?([+-]?(?:\d+[,.])+\d{1,2})"?'),
 }
 
 # The left-to-right order in which the patterns occur
@@ -35,8 +35,10 @@ def infoselect(res, line):
 def amountselect(res, line):
     """Return the result from the list res (origin from line) that is to
     be used as amount."""
-    return res[-1]
-
+    if len(res) == 2:
+        return res[0]
+    elif len(res) == 3:
+        return res[1]
 
 # The extension of the files to read.
 ext = 'csv'
@@ -47,7 +49,7 @@ skiprows = 1
 # Use this to conver the amount string to a float.
 def crazyfloat(s):
     """Convert the string s to a float"""
-    s = floatstr.replace(',', '.')
+    s = s.replace(',', '.')
     n = s.count('.')
     if n > 1:
         s = s.replace('.', '', n - 1)
