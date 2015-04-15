@@ -4,7 +4,7 @@ if not trivial, it shall be possible to build a regex for extracting
 data from any kind of log format. The default will be a format familiar
 to the developer.
 
-The rxpatterns are serched for with re.findall. If results are multiple,
+The rxpatterns are searched for with re.findall. If results are multiple,
 functions are provided here to select one of them from the list.
 """
 rxpatterns = {
@@ -19,7 +19,7 @@ rxpatterns = {
 # The left-to-right order in which the patterns occur
 rxorder = ['date', 'info', 'amount']
 
-# The rxpatterns are serched for with re.findall. If results are multiple,
+# The rxpatterns are searched for with re.findall. If results are multiple,
 # functions are provided here to select one of them from the list. Below
 # functions are called only if the resulting list length exceeds one.
 def dateselect(res, line):
@@ -46,7 +46,7 @@ ext = 'csv'
 # Number of rows to skip (header)
 skiprows = 1
 
-# Use this to conver the amount string to a float.
+# Use this to convert the amount string to a float.
 def crazyfloat(s):
     """Convert the string s to a float"""
     s = s.replace(',', '.')
@@ -55,7 +55,7 @@ def crazyfloat(s):
         s = s.replace('.', '', n - 1)
     return float(s)
 
-# Use this to conver the date string to a datetime.date object.
+# Use this to convert the date string to a datetime.date object.
 def transdate(dstr):
     """Return a datetime.date object on the dstr. YYYY-MM-DD"""
 
