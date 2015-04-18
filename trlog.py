@@ -12,6 +12,9 @@ import itertools
 sys.path.insert(0, os.getcwd())
 try:
     import trconf
+    fn = os.path.basename(trconf.__file__)
+    if not fn in os.listdir(os.getcwd()):
+        sys.exit('E: No trconf.py file in current directory')
     rxdate = re.compile(trconf.rxpatterns['date'])
     rxinfo = re.compile(trconf.rxpatterns['info'])
     rxamount = re.compile(trconf.rxpatterns['amount'])
@@ -106,35 +109,32 @@ def init(fn, content):
         pass
     with open(fn, 'w') as fo:
         fo.write(content)
-    
-def reduced(transes, regexes):
-    """Reduce the result based on args"""
 
+def rxreduced(transes, regexes=None, ignorecase=False):
+    """Reduce the transes. No reduction is done if regexes
+    is None."""
+
+    if regexes is None:
+        return transes
     def qualify(trans):
         for rx in regexes:
-            if re.search(rx, trans.line, re.U):
-                return True
+            if not ignorecase:
+                if re.search(rx, trans.line, re.U):
+                    return True
+            else:
+                if re.search(rx, trans.line, re.U | re.I):
+                    return True
         return False
 
     return [trans for trans in itertools.ifilter(qualify, transes)]
 
 def main():
-    # try things
-    # f = sys.argv[-1]
-    # print sys.argv[0]
 
-    # transes = parse(decodefile(f), 1)
-
-    # with EncodedOut('utf-8'):
-    #     for trans in transes:
-    #         print trans.line
-    #         print '\t', trans.date
-    #         print '\t', trans.info
-    #         print '\t', trans.amount
-    
     if args.Init or args.init:
         init('trconf.py', conftxt)
         sys.exit(0)
+    elif not 'trconf.py' in os.listdir(os.getcwd()):
+        sys.exit('E: No trconf.py file in current directory')
 
     if len(args.filenames) == 0:
         for ext in trconf.exts:
@@ -142,7 +142,8 @@ def main():
     transes = []
     for filename in args.filenames:
         if not any(filename.endswith(ext) for ext in trconf.exts):
-            raise FileExtError('extension not in trconf: ' + filename)
+            sys.exit('E: extension not in trconf: ' + filename)
+            # raise FileExtError('extension not in trconf: ' + filename)
         transes += decodeparse(filename, trconf.skiprows, trconf.encodings)
 
     transes.sort(key=operator.attrgetter('date'))
@@ -151,7 +152,7 @@ def main():
         if args.regexes is not None:
             regexes = [decoderegex(rx, sys.stdout.encoding or 'utf-8') for
                        rx in args.regexes] # should be stdin?
-            for trans in reduced(transes, regexes):
+            for trans in rxreduced(transes, regexes, args.ignorecase):
                 print trans.line
         else:
             for trans in transes:
@@ -161,23 +162,21 @@ parser = argparse.ArgumentParser(description='Query bank transactions in'
                                  ' a local database')
 parser.add_argument(dest='filenames', metavar='filename', nargs='*')
 
-parser.add_argument('-E', '--regex', metavar='regex', dest='regexes', 
-                    action='append', help='regular expression, the option with '
-                    'expression can be repeated')
+parser.add_argument('-E', '--regex', metavar='regex', dest='regexes',
+                    action='append', help='regular expression python style, '
+                    'the option with expression can be repeated')
 
-parser.add_argument('-p', '--print', dest='print', action='store', 
-                    metavar='toprint', help='print control. DIA in any'
-                    ' combination, 1-3 characters')
+parser.add_argument('-i', '--ignore-case', dest='ignorecase',
+                    action='store_true', help='ignore case in the expression')
 
-parser.add_argument('-s', '--stat', dest='stat', action='store_true',
-                    help='output a summary on the files given, if no files '
-                    'given, output a summary on all files')
+parser.add_argument('-s', '--summary', dest='summary', action='store_true',
+                    help='output the summary only')
 
 group = parser.add_mutually_exclusive_group()
-group.add_argument('-i', '--init', dest='init', action='store_true', 
-                    help='Initialize the the directory, '
+group.add_argument('--init', dest='init', action='store_true',
+                   help='Initialize the the directory, '
                     '(output a trconf.py file)')
-group.add_argument('-I', '--Init', dest='Init', action='store_true', 
+group.add_argument('--Init', dest='Init', action='store_true',
                     help='Initialize the the directory, '
                     '(output a trconf.py file)'' overwrite existing file')
 
