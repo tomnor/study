@@ -16,12 +16,12 @@ try:
     if not fn in os.listdir(os.getcwd()):
         sys.exit('E: No trconf.py file in current directory')
     rxdate = re.compile(trconf.rxpatterns['date'])
-    rxinfo = re.compile(trconf.rxpatterns['info'])
+    # rxinfo = re.compile(trconf.rxpatterns['info'])
     rxamount = re.compile(trconf.rxpatterns['amount'])
 except ImportError:
     pass
 
-Trans = collections.namedtuple('Trans', ('date', 'info', 'amount', 'line'))
+Trans = collections.namedtuple('Trans', ('date', 'amount', 'line'))
 
 class FileExtError(Exception):
     """Raise if a file with extension not listed in transconf is
@@ -40,9 +40,10 @@ class EncodedOut:
         sys.stdout = self.stdout
 
 def parse(fo, skiprows):
-    """fo the fileobject via codecs.open.."""
+    """fo the fileobject via codecs.open. Return a list of transes and a
+    list of error transes --> (transes, etranses)"""
 
-    lines = []
+    transes, etranses = [], []
     for line in fo.readlines()[skiprows:]:
 
         line = line.strip()
@@ -57,15 +58,15 @@ def parse(fo, skiprows):
             date = trconf.dateselect(res, line)
         try:
             date = datetime.date(*[int(n) for n in date.split('-')])
-        except:
+        except (TypeError, AttributeError):
             date = None
 
-        info = None
-        res = rxinfo.findall(line)
-        if len(res) == 1:
-            info = res[0]
-        elif len(res) > 1:
-            info = trconf.infoselect(res, line)
+        # info = None
+        # res = rxinfo.findall(line)
+        # if len(res) == 1:
+        #     info = res[0]
+        # elif len(res) > 1:
+        #     info = trconf.infoselect(res, line)
 
         amount = None
         res = rxamount.findall(line)
@@ -78,9 +79,12 @@ def parse(fo, skiprows):
         except:
             amount = None
 
-        lines.append(Trans(date, info, amount, line))
+        if None in (date, amount, line):
+            etranses.append(Trans(date, amount, line))
+        else:
+            transes.append(Trans(date, amount, line))
 
-    return lines
+    return transes, etranses
 
 
 def decodeparse(f, skiprows, encodings):
@@ -128,6 +132,30 @@ def rxreduced(transes, regexes=None, ignorecase=False):
 
     return [trans for trans in itertools.ifilter(qualify, transes)]
 
+def summary(redtranses, transes, etranses):
+    """Output a summary of the transes. redtranses is the transes to
+    compute on, transes are all transes parsed, etranses are the transes
+    with parsing errors."""
+
+    res, tot, e = len(redtranses), len(transes) + len(etranses), len(etranses)
+    print 50 * '-'
+    print 'Total parsed records:', tot, 'parseerrors:', e, 'matching:', res
+    if e:
+        print '\tmatching excludes parseerrors records'
+
+    if not len(redtranses):
+        return
+    fmt = 'sum: {:.2f} average: {:.2f}'
+    summ =  sum(t.amount for t in redtranses)
+    print fmt.format(summ, summ / len(redtranses))
+    print 'percentiles:'
+    asort = sorted(redtranses, key=operator.attrgetter('amount'),
+                   reverse=trconf.reversedpercentiles)
+    fmt = '{:3d} {:f}'
+    for perc in (0.0, 0.25, 0.50, 0.75, 1.0):
+        i = int(round(perc * (len(asort) - 1)))
+        print fmt.format(int(perc * 100), asort[i].amount)
+
 def main():
 
     if args.Init or args.init:
@@ -139,12 +167,15 @@ def main():
     if len(args.filenames) == 0:
         for ext in trconf.exts:
             args.filenames += glob.glob('*' + ext)
-    transes = []
+
+    transes, etranses = [], []
     for filename in args.filenames:
         if not any(filename.endswith(ext) for ext in trconf.exts):
             sys.exit('E: extension not in trconf: ' + filename)
             # raise FileExtError('extension not in trconf: ' + filename)
-        transes += decodeparse(filename, trconf.skiprows, trconf.encodings)
+        res = decodeparse(filename, trconf.skiprows, trconf.encodings)
+        transes += res[0]
+        etranses += res[1]
 
     transes.sort(key=operator.attrgetter('date'))
 
@@ -152,11 +183,14 @@ def main():
         if args.regexes is not None:
             regexes = [decoderegex(rx, sys.stdout.encoding or 'utf-8') for
                        rx in args.regexes] # should be stdin?
-            for trans in rxreduced(transes, regexes, args.ignorecase):
+            rxtranses = rxreduced(transes, regexes, args.ignorecase)
+            for trans in rxtranses:
                 print trans.line
+            summary(rxtranses, transes, etranses)
         else:
             for trans in transes:
                 print trans.line
+            summary(transes, transes, etranses)
 
 parser = argparse.ArgumentParser(description='Query bank transactions in'
                                  ' a local database')
@@ -171,6 +205,10 @@ parser.add_argument('-i', '--ignore-case', dest='ignorecase',
 
 parser.add_argument('-s', '--summary', dest='summary', action='store_true',
                     help='output the summary only')
+
+parser.add_argument('-d', '--debug', dest='debug', action='store_true',
+                    help='print only the lines that fail parsing with '
+                    'supportive text')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('--init', dest='init', action='store_true',
@@ -191,16 +229,14 @@ conftxt = '''
 # functions are provided here to select one of them from the list.
 
 rxpatterns = {
-# must have patterns 'date', 'info', 'amount'
+# must have patterns 'date', 'amount'
 # make each pattern a group
 'date': r'(\d{4}-\d{2}-\d{2})',
-'info': r'two'\
-        r'three',
 'amount': (r'"?([+-]?(?:\d+[,.])+\d{1,2})"?'),
 }
 
 # The left-to-right order in which the patterns occur
-rxorder = ['date', 'info', 'amount']
+rxorder = ['date', 'amount']
 
 # The rxpatterns are searched for with re.findall. If results are multiple,
 # functions are provided here to select one of them from the list. Below
@@ -208,11 +244,6 @@ rxorder = ['date', 'info', 'amount']
 def dateselect(res, line):
     # Return the result from the list res (origin from line) that is to
     # be used as date
-    return res[-1]
-
-def infoselect(res, line):
-    # Return the result from the list res (origin from line) that is to
-    # be used as info.
     return res[-1]
 
 def amountselect(res, line):
@@ -231,6 +262,9 @@ encodings = ['utf-8', 'latin-1']
 
 # Number of rows to skip (header)
 skiprows = 1
+
+# Reverse the sorting for percentiles
+reversedpercentiles = False
 
 # Use this to convert the amount string to a float.
 def crazyfloat(s):
