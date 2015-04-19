@@ -139,12 +139,21 @@ def summary(redtranses, transes, etranses):
 
     res, tot, e = len(redtranses), len(transes) + len(etranses), len(etranses)
     print 50 * '-'
+
     print 'Total parsed records:', tot, 'parseerrors:', e, 'matching:', res
     if e:
         print '\tmatching excludes parseerrors records'
 
     if not len(redtranses):
         return
+
+    d1, d2  = redtranses[0].date, redtranses[-1].date, 
+    print 'Period: ', d1, '-', d2, 'spanning', (d2 - d1).days, 'days'
+    fmt = 'distinct: {} years, {} months, {} days'
+    dy = set(trans.date.strftime('%Y') for trans in redtranses)
+    dm = set(trans.date.strftime('%Y-%m') for trans in redtranses)
+    dd = set(trans.date.strftime('%Y-%m-%d') for trans in redtranses)
+
     fmt = 'sum: {:.2f} average: {:.2f}'
     summ =  sum(t.amount for t in redtranses)
     print fmt.format(summ, summ / len(redtranses))
@@ -292,7 +301,6 @@ if __name__ == '__main__':
         rxamount = re.compile(trconf.rxpatterns['amount'])
     except ImportError:
         if not args.init and not args.Init:
-            print args.init, args.Init
             sys.exit('E: No trconf.py file in current directory')
 
     main()
