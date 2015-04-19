@@ -9,17 +9,17 @@ import glob
 import operator
 import itertools
 
-sys.path.insert(0, os.getcwd())
-try:
-    import trconf
-    fn = os.path.basename(trconf.__file__)
-    if not fn in os.listdir(os.getcwd()):
-        sys.exit('E: No trconf.py file in current directory')
-    rxdate = re.compile(trconf.rxpatterns['date'])
-    # rxinfo = re.compile(trconf.rxpatterns['info'])
-    rxamount = re.compile(trconf.rxpatterns['amount'])
-except ImportError:
-    pass
+# sys.path.insert(0, os.getcwd())
+# try:
+#     import trconf
+#     fn = os.path.basename(trconf.__file__)
+#     if not fn in os.listdir(os.getcwd()):
+#         sys.exit('E: No trconf.py file in current directory')
+#     rxdate = re.compile(trconf.rxpatterns['date'])
+#     # rxinfo = re.compile(trconf.rxpatterns['info'])
+#     rxamount = re.compile(trconf.rxpatterns['amount'])
+# except ImportError:
+#     pass
 
 Trans = collections.namedtuple('Trans', ('date', 'amount', 'line'))
 
@@ -105,7 +105,7 @@ def decoderegex(rx, encoding):
 def init(fn, content):
     """Write the confile"""
     if fn in os.listdir('.') and not args.Init:
-        print 'E:', fn, 'exist, ues -I to over-write.'
+        print 'E:', fn, 'exist, ues --Init to over-write.'
         sys.exit(1)
     try:
         os.remove(fn.replace('.py', '.pyc'))
@@ -161,8 +161,6 @@ def main():
     if args.Init or args.init:
         init('trconf.py', conftxt)
         sys.exit(0)
-    elif not 'trconf.py' in os.listdir(os.getcwd()):
-        sys.exit('E: No trconf.py file in current directory')
 
     if len(args.filenames) == 0:
         for ext in trconf.exts:
@@ -283,5 +281,19 @@ def transdate(dstr):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+
+    sys.path.insert(0, os.getcwd())
+    try:
+        import trconf
+        fn = os.path.basename(trconf.__file__)
+        if not fn in os.listdir(os.getcwd()):
+            raise ImportError
+        rxdate = re.compile(trconf.rxpatterns['date'])
+        rxamount = re.compile(trconf.rxpatterns['amount'])
+    except ImportError:
+        if not args.init and not args.Init:
+            print args.init, args.Init
+            sys.exit('E: No trconf.py file in current directory')
+
     main()
 
