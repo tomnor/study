@@ -140,19 +140,21 @@ def summary(redtranses, transes, etranses):
     res, tot, e = len(redtranses), len(transes) + len(etranses), len(etranses)
     print 50 * '-'
 
-    print 'Total parsed records:', tot, 'parseerrors:', e, 'matching:', res
+    fmt = 'Total parsed records: {}, parse-errors: {}, matching: {}'
+    print fmt.format(tot, e, res)
     if e:
-        print '\tmatching excludes parseerrors records'
+        print 'W: matching excludes parse-error records'
 
     if not len(redtranses):
         return
 
     d1, d2  = redtranses[0].date, redtranses[-1].date, 
-    print 'Period: ', d1, '-', d2, 'spanning', (d2 - d1).days, 'days'
+    print 'Period: ', d1, '-', d2, 'spanning', (d2 - d1).days + 1, 'days'
     fmt = 'distinct: {} years, {} months, {} days'
-    dy = set(trans.date.strftime('%Y') for trans in redtranses)
-    dm = set(trans.date.strftime('%Y-%m') for trans in redtranses)
-    dd = set(trans.date.strftime('%Y-%m-%d') for trans in redtranses)
+    dd = set(trans.date for trans in redtranses)
+    dm = set((date.year, date.month) for date in dd)
+    dy = set(tup[0] for tup in dm)
+    print fmt.format(len(dy), len(dm), len(dd))
 
     fmt = 'sum: {:.2f} average: {:.2f}'
     summ =  sum(t.amount for t in redtranses)
@@ -160,7 +162,7 @@ def summary(redtranses, transes, etranses):
     print 'percentiles:'
     asort = sorted(redtranses, key=operator.attrgetter('amount'),
                    reverse=trconf.reversedpercentiles)
-    fmt = '{:3d} {:f}'
+    fmt = '{:3d} {:.2f}'
     for perc in (0.0, 0.25, 0.50, 0.75, 1.0):
         i = int(round(perc * (len(asort) - 1)))
         print fmt.format(int(perc * 100), asort[i].amount)
@@ -187,16 +189,22 @@ def main():
     transes.sort(key=operator.attrgetter('date'))
 
     with EncodedOut('utf-8'):
-        if args.regexes is not None:
+        if args.regexes is not None and not args.debug:
             regexes = [decoderegex(rx, sys.stdout.encoding or 'utf-8') for
                        rx in args.regexes] # should be stdin?
             rxtranses = rxreduced(transes, regexes, args.ignorecase)
-            for trans in rxtranses:
-                print trans.line
+            if not args.summary:
+                for trans in rxtranses:
+                    print trans.line
             summary(rxtranses, transes, etranses)
-        else:
-            for trans in transes:
+        elif args.debug:
+            for trans in etranses:
                 print trans.line
+                print '    date:', trans.date, 'amount:', trans.amount
+        else:
+            if not args.summary:
+                for trans in transes:
+                    print trans.line
             summary(transes, transes, etranses)
 
 parser = argparse.ArgumentParser(description='Query bank transactions in'
@@ -214,8 +222,8 @@ parser.add_argument('-s', '--summary', dest='summary', action='store_true',
                     help='output the summary only')
 
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
-                    help='print only the lines that fail parsing with '
-                    'supportive text')
+                    help='print only the lines that failed parsing with '
+                    'informative data added')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('--init', dest='init', action='store_true',
