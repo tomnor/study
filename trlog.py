@@ -9,18 +9,6 @@ import glob
 import operator
 import itertools
 
-# sys.path.insert(0, os.getcwd())
-# try:
-#     import trconf
-#     fn = os.path.basename(trconf.__file__)
-#     if not fn in os.listdir(os.getcwd()):
-#         sys.exit('E: No trconf.py file in current directory')
-#     rxdate = re.compile(trconf.rxpatterns['date'])
-#     # rxinfo = re.compile(trconf.rxpatterns['info'])
-#     rxamount = re.compile(trconf.rxpatterns['amount'])
-# except ImportError:
-#     pass
-
 Trans = collections.namedtuple('Trans', ('date', 'amount', 'line'))
 
 class FileExtError(Exception):
@@ -60,13 +48,6 @@ def parse(fo, skiprows):
             date = datetime.date(*[int(n) for n in date.split('-')])
         except (TypeError, AttributeError):
             date = None
-
-        # info = None
-        # res = rxinfo.findall(line)
-        # if len(res) == 1:
-        #     info = res[0]
-        # elif len(res) > 1:
-        #     info = trconf.infoselect(res, line)
 
         amount = None
         res = rxamount.findall(line)
@@ -148,7 +129,7 @@ def summary(redtranses, transes, etranses):
     if not len(redtranses):
         return
 
-    d1, d2  = redtranses[0].date, redtranses[-1].date, 
+    d1, d2  = redtranses[0].date, redtranses[-1].date,
     print 'Period: ', d1, '-', d2, 'spanning', (d2 - d1).days + 1, 'days'
     fmt = 'distinct: {} years, {} months, {} days'
     dd = set(trans.date for trans in redtranses)
@@ -181,7 +162,6 @@ def main():
     for filename in args.filenames:
         if not any(filename.endswith(ext) for ext in trconf.exts):
             sys.exit('E: extension not in trconf: ' + filename)
-            # raise FileExtError('extension not in trconf: ' + filename)
         res = decodeparse(filename, trconf.skiprows, trconf.encodings)
         transes += res[0]
         etranses += res[1]
@@ -196,7 +176,8 @@ def main():
             if not args.summary:
                 for trans in rxtranses:
                     print trans.line
-            summary(rxtranses, transes, etranses)
+            if not args.nosummary:
+                summary(rxtranses, transes, etranses)
         elif args.debug:
             for trans in etranses:
                 print trans.line
@@ -205,7 +186,8 @@ def main():
             if not args.summary:
                 for trans in transes:
                     print trans.line
-            summary(transes, transes, etranses)
+            if not args.nosummary:
+                summary(transes, transes, etranses)
 
 parser = argparse.ArgumentParser(description='Query bank transactions in'
                                  ' a local database')
@@ -218,8 +200,12 @@ parser.add_argument('-E', '--regex', metavar='regex', dest='regexes',
 parser.add_argument('-i', '--ignore-case', dest='ignorecase',
                     action='store_true', help='ignore case in the expression')
 
-parser.add_argument('-s', '--summary', dest='summary', action='store_true',
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-s', '--summary', dest='summary', action='store_true',
                     help='output the summary only')
+
+group.add_argument('-S', '--no-summary', dest='nosummary',
+                    action='store_true', help='supress the summary')
 
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                     help='print only the lines that failed parsing with '
@@ -242,7 +228,7 @@ conftxt = '''
 
 # The rxpatterns are searched for with re.findall. If results are multiple,
 # functions are provided here to select one of them from the list.
-
+import re                       # should you need it
 rxpatterns = {
 # must have patterns 'date', 'amount'
 # make each pattern a group
@@ -253,21 +239,43 @@ rxpatterns = {
 # The left-to-right order in which the patterns occur
 rxorder = ['date', 'amount']
 
-# The rxpatterns are searched for with re.findall. If results are multiple,
-# functions are provided here to select one of them from the list. Below
-# functions are called only if the resulting list length exceeds one.
+# The rxpatterns are searched for with re.findall. If results are
+# multiple, functions are provided here to select one of them from the
+# list. Below functions are called only if the resulting list length
+# exceeds one.
 def dateselect(res, line):
     # Return the result from the list res (origin from line) that is to
     # be used as date
-    return res[-1]
+    return res[0]
 
 def amountselect(res, line):
     # Return the result from the list res (origin from line) that is to
     # be used as amount.
     if len(res) == 2:
         return res[0]
-    elif len(res) == 3:
-        return res[1]
+    elif len(res) >= 3:
+        return res[-2]
+
+# Here is a version of amountselect that deals with a timestamp
+# interpreted as amount:
+# rxclock = re.compile(r'[0-2][0-9]\.[0-5][0-9]')
+# def amountselect(res, line):
+#     # Return the result from the list res (origin from line) that is to
+#     # be used as amount.
+
+#     m = rxclock.search(line)
+
+#     try:
+#         res.remove(m.group())
+#         if len(res) == 1:
+#             return res[0]
+#     except (AttributeError, ValueError):
+#         pass
+
+#     if len(res) == 2:
+#         return res[0]
+#     elif len(res) >= 3:
+#         return res[-2]
 
 # The extension(s) of the files to read.
 exts = ['.csv']
@@ -279,7 +287,7 @@ encodings = ['utf-8', 'latin-1']
 skiprows = 1
 
 # Reverse the sorting for percentiles
-reversedpercentiles = False
+reversedpercentiles = True
 
 # Use this to convert the amount string to a float.
 def crazyfloat(s):
