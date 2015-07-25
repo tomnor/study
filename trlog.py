@@ -256,8 +256,8 @@ def amountselect(res, line):
     elif len(res) >= 3:
         return res[-2]
 
-# Here is a version of amountselect that deals with a timestamp
-# interpreted as amount:
+##Here is a version of amountselect that deals with a timestamp
+##interpreted as amount:
 # rxclock = re.compile(r'[0-2][0-9]\.[0-5][0-9]')
 # def amountselect(res, line):
 #     # Return the result from the list res (origin from line) that is to
