@@ -101,14 +101,18 @@ def rxreduced(transes, regexes=None, ignorecase=False):
 
     if regexes is None:
         return transes
+
+    re_flags = ignorecase and (re.U | re.I) or re.U
+
     def qualify(trans):
         for rx in regexes:
-            if not ignorecase:
-                if re.search(rx, trans.line, re.U):
-                    return True
-            else:
-                if re.search(rx, trans.line, re.U | re.I):
-                    return True
+            match = re.search(rx, trans.line, re_flags)
+            if match and not (args.positive or args.negative):
+                return True
+            elif match and args.positive:
+                return trans.amount >= 0
+            elif match:         # args.negative is True
+                return trans.amount < 0
         return False
 
     return [trans for trans in itertools.ifilter(qualify, transes)]
@@ -206,6 +210,13 @@ group.add_argument('-s', '--summary', dest='summary', action='store_true',
 
 group.add_argument('-S', '--no-summary', dest='nosummary',
                     action='store_true', help='supress the summary')
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-p', '--positive', dest='positive', action='store_true',
+                   help='Match positive transactions only.')
+
+group.add_argument('-n', '--negative', dest='negative', action='store_true',
+                    help='Match negative transactions only.')
 
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                     help='print only the lines that failed parsing with '
@@ -320,4 +331,3 @@ if __name__ == '__main__':
             sys.exit('E: No trconf.py file in current directory')
 
     main()
-
