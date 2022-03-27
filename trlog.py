@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import os, sys
 import collections
 import re
@@ -7,7 +7,7 @@ import codecs
 import argparse
 import glob
 import operator
-import itertools
+
 
 Trans = collections.namedtuple('Trans', ('date', 'amount', 'line'))
 
@@ -79,14 +79,11 @@ def decodeparse(f, skiprows, encodings):
             pass
     raise
 
-def decoderegex(rx, encoding):
-    """Return a unicode of the regex (from args)"""
-    return unicode(rx, encoding)
 
 def init(fn, content):
     """Write the confile"""
     if fn in os.listdir('.') and not args.Init:
-        print 'E:', fn, 'exist, ues --Init to over-write.'
+        print('E:', fn, 'exist, ues --Init to over-write.')
         sys.exit(1)
     try:
         os.remove(fn.replace('.py', '.pyc'))
@@ -115,7 +112,8 @@ def rxreduced(transes, regexes=None, ignorecase=False):
                 return trans.amount < 0
         return False
 
-    return [trans for trans in itertools.ifilter(qualify, transes)]
+    return [trans for trans in filter(qualify, transes)]
+
 
 def summary(redtranses, transes, etranses):
     """Output a summary of the transes. redtranses is the transes to
@@ -123,34 +121,34 @@ def summary(redtranses, transes, etranses):
     with parsing errors."""
 
     res, tot, e = len(redtranses), len(transes) + len(etranses), len(etranses)
-    print 50 * '-'
+    print(50 * '-')
 
     fmt = 'Total parsed records: {}, parse-errors: {}, matching: {}'
-    print fmt.format(tot, e, res)
+    print(fmt.format(tot, e, res))
     if e:
-        print 'W: matching excludes parse-error records'
+        print('W: matching excludes parse-error records')
 
     if not len(redtranses):
         return
 
     d1, d2  = redtranses[0].date, redtranses[-1].date,
-    print 'Period: ', d1, '-', d2, 'spanning', (d2 - d1).days + 1, 'days'
+    print('Period: ', d1, '-', d2, 'spanning', (d2 - d1).days + 1, 'days')
     fmt = 'distinct: {} years, {} months, {} days'
     dd = set(trans.date for trans in redtranses)
     dm = set((date.year, date.month) for date in dd)
     dy = set(tup[0] for tup in dm)
-    print fmt.format(len(dy), len(dm), len(dd))
+    print(fmt.format(len(dy), len(dm), len(dd)))
 
     fmt = 'sum: {:.2f} average: {:.2f}'
     summ =  sum(t.amount for t in redtranses)
-    print fmt.format(summ, summ / len(redtranses))
-    print 'percentiles:'
+    print(fmt.format(summ, summ / len(redtranses)))
+    print('percentiles:')
     asort = sorted(redtranses, key=operator.attrgetter('amount'),
                    reverse=trconf.reversedpercentiles)
     fmt = '{:3d} {:.2f}'
     for perc in (0.0, 0.25, 0.50, 0.75, 1.0):
         i = int(round(perc * (len(asort) - 1)))
-        print fmt.format(int(perc * 100), asort[i].amount)
+        print(fmt.format(int(perc * 100), asort[i].amount))
 
 def main():
 
@@ -174,22 +172,21 @@ def main():
 
     with EncodedOut('utf-8'):
         if args.regexes is not None and not args.debug:
-            regexes = [decoderegex(rx, sys.stdout.encoding or 'utf-8') for
-                       rx in args.regexes] # should be stdin?
+            regexes = args.regexes
             rxtranses = rxreduced(transes, regexes, args.ignorecase)
             if not args.summary:
                 for trans in rxtranses:
-                    print trans.line
+                    print(trans.line)
             if not args.nosummary:
                 summary(rxtranses, transes, etranses)
         elif args.debug:
             for trans in etranses:
-                print trans.line
-                print '    date:', trans.date, 'amount:', trans.amount
+                print(trans.line)
+                print('    date:', trans.date, 'amount:', trans.amount)
         else:
             if not args.summary:
                 for trans in transes:
-                    print trans.line
+                    print(trans.line)
             if not args.nosummary:
                 summary(transes, transes, etranses)
 
